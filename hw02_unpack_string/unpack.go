@@ -46,7 +46,7 @@ func Unpack(input string) (string, error) {
 	inputAsRuneArr := []rune(input)
 
 	for i, v := range inputAsRuneArr {
-		//nolint:go-critic
+		//nolint:gocritic
 		if isEscaped(inputAsRuneArr, i) && !isCount(inputAsRuneArr, i+1) {
 			result.WriteRune(v)
 		} else if isCount(inputAsRuneArr, i) {
