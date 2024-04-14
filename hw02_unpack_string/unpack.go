@@ -7,8 +7,7 @@ import (
 	"unicode"
 )
 
-var ErrInvalidString = errors.New("invalid string")
-var escapeRune rune = []rune(`\`)[0]
+var escapeRune = []rune(`\`)[0]
 
 func getSequenceLen(arr []rune, index int) int {
 	elem := arr[index]
@@ -39,12 +38,15 @@ func isCount(arr []rune, index int) bool {
 	return unicode.IsDigit(arr[index]) && !isEscaped(arr, index)
 }
 
+var ErrInvalidString = errors.New("invalid string")
+
 func Unpack(input string) (string, error) {
 	var result strings.Builder
 
 	inputAsRuneArr := []rune(input)
 
 	for i, v := range inputAsRuneArr {
+		//nolint:go-critic
 		if isEscaped(inputAsRuneArr, i) && !isCount(inputAsRuneArr, i+1) {
 			result.WriteRune(v)
 		} else if isCount(inputAsRuneArr, i) {
@@ -54,7 +56,6 @@ func Unpack(input string) (string, error) {
 			literalStr := string(inputAsRuneArr[i-1])
 			digit, _ := strconv.Atoi(string(v))
 			result.WriteString(strings.Repeat(literalStr, digit))
-
 		} else if v != escapeRune && !isCount(inputAsRuneArr, i+1) {
 			result.WriteRune(v)
 		}
