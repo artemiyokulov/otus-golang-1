@@ -43,10 +43,9 @@ func Unpack(input string) (string, error) {
 	var result strings.Builder
 
 	inputAsRuneArr := []rune(input)
-	inputAsRuneArrLen := len(inputAsRuneArr)
 
 	for i, v := range inputAsRuneArr {
-		if isEscaped(inputAsRuneArr, i) && ((i+1 >= inputAsRuneArrLen) || !unicode.IsDigit(inputAsRuneArr[i+1])) {
+		if isEscaped(inputAsRuneArr, i) && !isCount(inputAsRuneArr, i+1) {
 			result.WriteRune(v)
 		} else if isCount(inputAsRuneArr, i) {
 			if (i-1 < 0) || (isCount(inputAsRuneArr, i-1)) {
@@ -56,7 +55,7 @@ func Unpack(input string) (string, error) {
 			digit, _ := strconv.Atoi(string(v))
 			result.WriteString(strings.Repeat(literalStr, digit))
 
-		} else if ((i+1 >= inputAsRuneArrLen) || !unicode.IsDigit(inputAsRuneArr[i+1])) && v != escapeRune {
+		} else if v != escapeRune && !isCount(inputAsRuneArr, i+1) {
 			result.WriteRune(v)
 		}
 	}
