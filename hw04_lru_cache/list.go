@@ -81,8 +81,8 @@ func (instance *list) exclude(i *ListItem) {
 		instance.back = i.Prev
 		instance.back.Next = nil
 	} else {
-		var prev = i.Prev
-		var next = i.Next
+		prev := i.Prev
+		next := i.Next
 
 		next.Prev = prev
 		prev.Next = next
