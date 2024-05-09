@@ -28,7 +28,7 @@ func (cache *lruCache) Set(key Key, value interface{}) bool {
 		return true
 	}
 
-	var newItem = cache.queue.PushFront(value)
+	newItem := cache.queue.PushFront(value)
 	newItem.Value = value
 	cache.items[key] = newItem
 	cache.reverseItems[newItem] = key
