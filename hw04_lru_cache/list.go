@@ -73,6 +73,7 @@ func (instance *list) PushBack(v interface{}) *ListItem {
 
 func (instance *list) exclude(i *ListItem) {
 	// если исключаемый элемент front
+	//nolint:gocritic
 	if i.Prev == nil {
 		instance.front = i.Next
 		instance.front.Prev = nil
@@ -80,8 +81,8 @@ func (instance *list) exclude(i *ListItem) {
 		instance.back = i.Prev
 		instance.back.Next = nil
 	} else {
-		var prev *ListItem = i.Prev
-		var next *ListItem = i.Next
+		var prev = i.Prev
+		var next = i.Next
 
 		next.Prev = prev
 		prev.Next = next
@@ -98,7 +99,6 @@ func (instance *list) Remove(i *ListItem) {
 	}
 
 	instance.exclude(i)
-	i = nil
 }
 
 func (instance *list) MoveToFront(i *ListItem) {
