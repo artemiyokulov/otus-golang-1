@@ -28,11 +28,18 @@ func Run(tasks []Task, n, m int) error {
 			defer waitGroup.Done()
 			for {
 				f, ok := <-fifo
-				if !ok || errorBudget <= 0 || recievedTasks > tasksCount {
+				if !ok {
+					return
+				}
+				atomic.AddInt32(&recievedTasks, 1)
+				if atomic.LoadInt32(&recievedTasks) > atomic.LoadInt32(&tasksCount) {
 					return
 				}
 				if result := f(); result != nil {
 					atomic.AddInt32(&errorBudget, -1)
+				}
+				if atomic.LoadInt32(&errorBudget) <= 0 {
+					return
 				}
 			}
 		}()
