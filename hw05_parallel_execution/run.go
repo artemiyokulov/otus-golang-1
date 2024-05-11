@@ -2,7 +2,6 @@ package hw05parallelexecution
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 )
@@ -45,7 +44,6 @@ func Run(tasks []Task, n, m int) error {
 	close(fifo)
 
 	waitGroup.Wait()
-	fmt.Println(recievedTasks)
 	if errorBudget <= 0 {
 		return ErrErrorsLimitExceeded
 	}
