@@ -102,6 +102,5 @@ func TestRun(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
-
 	})
 }
