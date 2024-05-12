@@ -91,7 +91,7 @@ func TestRun(t *testing.T) {
 		require.Eventually(
 			t,
 			func() bool {
-				result := runTasksCount > int32(testedTasks)+int32(min(workersCount, tasksCount))
+				result := runTasksCount > int32(testedTasks)+int32(workersCount)
 				testedTasks = int(runTasksCount)
 				return result
 			},

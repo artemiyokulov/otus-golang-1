@@ -13,28 +13,25 @@ type Task func() error
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
 	tasksCount := int32(len(tasks))
+
+	if tasksCount == 0 {
+		return nil
+	}
+
 	errorBudget := int32(m)
 	recievedTasks := int32(0)
-	neededWorkers := min(n, int(tasksCount))
 
 	fifo := make(chan Task, tasksCount)
 
 	waitGroup := sync.WaitGroup{}
 
-	waitGroup.Add(neededWorkers)
+	waitGroup.Add(n)
 
-	for i := 0; i < neededWorkers; i++ {
+	for i := 0; i < n; i++ {
 		go func() {
 			defer waitGroup.Done()
-			for {
-				f, ok := <-fifo
-				if !ok {
-					return
-				}
+			for f := range fifo {
 				atomic.AddInt32(&recievedTasks, 1)
-				if atomic.LoadInt32(&recievedTasks) > atomic.LoadInt32(&tasksCount) {
-					return
-				}
 				if result := f(); result != nil {
 					atomic.AddInt32(&errorBudget, -1)
 				}
