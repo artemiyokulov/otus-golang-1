@@ -19,7 +19,6 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	errorBudget := int32(m)
-	recievedTasks := int32(0)
 
 	fifo := make(chan Task, tasksCount)
 
@@ -31,7 +30,6 @@ func Run(tasks []Task, n, m int) error {
 		go func() {
 			defer waitGroup.Done()
 			for f := range fifo {
-				atomic.AddInt32(&recievedTasks, 1)
 				if result := f(); result != nil {
 					atomic.AddInt32(&errorBudget, -1)
 				}
