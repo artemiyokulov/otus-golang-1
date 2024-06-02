@@ -24,13 +24,14 @@ func getFileSize(filepath string) int64 {
 }
 
 func validateInput(fromPath, toPath string, offset int64) error {
-	if file, err := os.OpenFile(fromPath, os.O_RDONLY, 0); err != nil {
+	file, err := os.OpenFile(fromPath, os.O_RDONLY, 0)
+	if err != nil {
 		return fmt.Errorf("can not read input file: %w", err)
-	} else {
-		if err := file.Close(); err != nil {
-			return fmt.Errorf("check file read: close input file error: %w", err)
-		}
 	}
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("check file read: close input file error: %w", err)
+	}
+
 	inputFileSize := getFileSize(fromPath)
 	if inputFileSize == 0 {
 		return ErrUnsupportedFile
@@ -77,17 +78,17 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	for limit > 0 {
 		readedBytesCount, err := inputFile.Read(buffer[:min(readPartSize, limit)])
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return fmt.Errorf("error while reading from input file: %w", err)
 		}
-		if err == io.EOF && readedBytesCount == 0 {
+		if errors.Is(err, io.EOF) && readedBytesCount == 0 {
 			break
 		}
 		_, err = outputFile.Write(buffer[:readedBytesCount])
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return fmt.Errorf("error while writing to output file: %w", err)
 		}
-		limit = limit - int64(readedBytesCount)
+		limit -= int64(readedBytesCount)
 		bar.Add64(int64(readedBytesCount))
 	}
 

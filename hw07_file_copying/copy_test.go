@@ -15,11 +15,12 @@ func fileAreEquals(filePath1, filePath2 string) bool {
 }
 
 func TestCopy(t *testing.T) {
+	testDataInputFilePath := "./testdata/input.txt"
 
 	t.Run("success copy", func(t *testing.T) {
 		outFile, err := os.CreateTemp("", "*")
 		require.NoError(t, err)
-		inputFilePath := "./testdata/input.txt"
+		inputFilePath := testDataInputFilePath
 		Copy(inputFilePath, outFile.Name(), 0, 0)
 		require.True(t, fileAreEquals(inputFilePath, outFile.Name()))
 	})
@@ -27,7 +28,7 @@ func TestCopy(t *testing.T) {
 	t.Run("fail if offset > file size", func(t *testing.T) {
 		outFile, err := os.CreateTemp("", "*")
 		require.NoError(t, err)
-		inputFilePath := "./testdata/input.txt"
+		inputFilePath := testDataInputFilePath
 		err = Copy(inputFilePath, outFile.Name(), getFileSize(inputFilePath)*2, 0)
 		require.Equal(t, ErrOffsetExceedsFileSize, err)
 	})
@@ -41,7 +42,7 @@ func TestCopy(t *testing.T) {
 	})
 
 	t.Run("from-to same file", func(t *testing.T) {
-		inputFilePath := "./testdata/input.txt"
+		inputFilePath := testDataInputFilePath
 		err := Copy(inputFilePath, inputFilePath, 0, 0)
 		require.Equal(t, ErrSameFiles, err)
 	})
