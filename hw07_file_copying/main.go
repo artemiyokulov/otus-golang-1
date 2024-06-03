@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"os"
 )
 
 var (
@@ -22,6 +21,5 @@ func main() {
 	flag.Parse()
 	if err := Copy(from, to, offset, limit); err != nil {
 		log.Fatalf("Runtime error: %s\n", err.Error())
-		os.Exit(1)
 	}
 }
