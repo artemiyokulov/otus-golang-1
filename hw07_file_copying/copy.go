@@ -12,6 +12,7 @@ import (
 var (
 	ErrUnsupportedFile       = errors.New("unsupported input file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
+	ErrOffsetBelowZero       = errors.New("offset less than 0")
 	ErrSameFiles             = errors.New("input and output are same files")
 )
 
@@ -21,6 +22,11 @@ func getFileSize(filepath string) int64 {
 		return 0
 	}
 	return fileInfo.Size()
+}
+
+func getAbsolutePath(filepath string) string {
+	fileInfo, _ := os.Lstat(filepath)
+	return fileInfo.Name()
 }
 
 func validateInput(fromPath, toPath string, offset int64) error {
@@ -36,11 +42,15 @@ func validateInput(fromPath, toPath string, offset int64) error {
 	if inputFileSize == 0 {
 		return ErrUnsupportedFile
 	}
-	if fromPath == toPath {
+
+	if getAbsolutePath(fromPath) == getAbsolutePath(toPath) {
 		return ErrSameFiles
 	}
 	if offset >= inputFileSize {
 		return ErrOffsetExceedsFileSize
+	}
+	if offset < 0 {
+		return ErrOffsetBelowZero
 	}
 	return nil
 }
@@ -50,27 +60,26 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return err
 	}
 	inputFileSize := getFileSize(fromPath)
-	if limit > inputFileSize || limit == 0 {
+	if limit > inputFileSize || limit <= 0 {
 		limit = inputFileSize - offset
 	}
 	inputFile, err := os.OpenFile(fromPath, os.O_RDONLY, 0)
+	defer func() {
+		inputFile.Close()
+	}()
 	if err != nil {
 		return fmt.Errorf("open input file error: %w", err)
 	}
 	if offset > 0 {
-		inputFile.Seek(offset, 0)
+		inputFile.Seek(offset, io.SeekStart)
 	}
 	outputFile, err := os.Create(toPath)
-	if err != nil {
-		return fmt.Errorf("output file error: %w", err)
-	}
-
-	defer func() {
-		inputFile.Close()
-	}()
 	defer func() {
 		outputFile.Close()
 	}()
+	if err != nil {
+		return fmt.Errorf("output file error: %w", err)
+	}
 
 	readPartSize := int64(1024)
 	bar := pb.Start64(limit)

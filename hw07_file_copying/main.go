@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
+	"os"
 )
 
 var (
@@ -20,6 +21,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if err := Copy(from, to, offset, limit); err != nil {
-		panic(fmt.Sprintf("Runtime error: %s\n", err.Error()))
+		log.Fatalf("Runtime error: %s\n", err.Error())
+		os.Exit(1)
 	}
 }
