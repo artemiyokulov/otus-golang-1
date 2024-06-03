@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/cheggaaa/pb/v3"
 )
@@ -24,11 +25,6 @@ func getFileSize(filepath string) int64 {
 	return fileInfo.Size()
 }
 
-func getAbsolutePath(filepath string) string {
-	fileInfo, _ := os.Lstat(filepath)
-	return fileInfo.Name()
-}
-
 func validateInput(fromPath, toPath string, offset int64) error {
 	file, err := os.OpenFile(fromPath, os.O_RDONLY, 0)
 	if err != nil {
@@ -43,7 +39,10 @@ func validateInput(fromPath, toPath string, offset int64) error {
 		return ErrUnsupportedFile
 	}
 
-	if getAbsolutePath(fromPath) == getAbsolutePath(toPath) {
+	fromAbsolutePath, _ := filepath.Abs(fromPath)
+	toAbsolutePath, _ := filepath.Abs(toPath)
+
+	if fromAbsolutePath == toAbsolutePath {
 		return ErrSameFiles
 	}
 	if offset >= inputFileSize {
