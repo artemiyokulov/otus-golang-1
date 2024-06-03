@@ -50,7 +50,7 @@ func TestCopy(t *testing.T) {
 	})
 
 	t.Run("from-to same file", func(t *testing.T) {
-		err := Copy("testdata/input.txt", "./testdata/input.txt", 0, 0)
+		err := Copy("././testdata/input.txt", "./testdata/input.txt", 0, 0)
 		require.Equal(t, ErrSameFiles, err)
 	})
 }
