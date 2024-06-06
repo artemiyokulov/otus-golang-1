@@ -75,7 +75,6 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 				}(elem, counter)
 			}
 		}
-
 	}()
 	return outCh
 }
