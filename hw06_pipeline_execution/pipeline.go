@@ -18,6 +18,16 @@ type Task struct {
 	result interface{}
 }
 
+func isTerminated(done In) bool {
+	if done != nil {
+		if _, ok := <-done; !ok {
+			return true
+		}
+	}
+
+	return false
+}
+
 func execChain(elem interface{}, done In, stages ...Stage) (result interface{}, ok bool) {
 	ch := make(Bi, 1)
 	ch <- elem
@@ -29,15 +39,15 @@ func execChain(elem interface{}, done In, stages ...Stage) (result interface{}, 
 	if !ok {
 		log.Fatal("corrupted stage")
 	}
-	select {
-	case <-done:
+
+	if isTerminated(done) {
 		return nil, false
-	default:
-		if len(stages) == 1 {
-			return processedValue, true
-		}
-		return execChain(processedValue, done, stages[1:]...)
 	}
+
+	if len(stages) == 1 {
+		return processedValue, true
+	}
+	return execChain(processedValue, done, stages[1:]...)
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
@@ -50,34 +60,31 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 			close(outCh)
 		}()
 		for {
-			select {
-			case <-done:
+			if isTerminated(done) {
 				wg.Add(-counter)
 				return
-			case elem, ok := <-in:
-				if !ok {
+			}
+			elem, ok := <-in
+			if !ok {
+				return
+			}
+			wg.Add(1)
+			counter++
+			go func(elem interface{}, id int) {
+				defer wg.Done()
+				if isTerminated(done) {
 					return
 				}
-				wg.Add(1)
-				counter++
-				go func(elem interface{}, id int) {
-					defer wg.Done()
-					select {
-					case <-done:
-						return
-					default:
-						if result, ok := execChain(elem, done, stages...); ok {
-							task := Task{
-								id:     id,
-								result: result,
-							}
-							outCh <- task
-						} else {
-							return
-						}
+				if result, ok := execChain(elem, done, stages...); ok {
+					task := Task{
+						id:     id,
+						result: result,
 					}
-				}(elem, counter)
-			}
+					outCh <- task
+				} else {
+					return
+				}
+			}(elem, counter)
 		}
 	}()
 	return outCh
