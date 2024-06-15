@@ -36,6 +36,24 @@ func TestPipeline(t *testing.T) {
 		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
 	}
 
+	t.Run("very simple debug case", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{1}
+
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+		result := make([]string, len(data), 10)
+		for s := range ExecutePipeline(in, nil, stages...) {
+			result[s.(Task).id-1] = s.(Task).result.(string)
+		}
+		require.Equal(t, []string{"102"}, result)
+	})
+
 	t.Run("simple case", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
@@ -47,10 +65,10 @@ func TestPipeline(t *testing.T) {
 			close(in)
 		}()
 
-		result := make([]string, 0, 10)
+		result := make([]string, len(data), 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, nil, stages...) {
-			result = append(result, s.(string))
+			result[s.(Task).id-1] = s.(Task).result.(string)
 		}
 		elapsed := time.Since(start)
 
@@ -80,14 +98,16 @@ func TestPipeline(t *testing.T) {
 			close(in)
 		}()
 
-		result := make([]string, 0, 10)
+		result := make([]string, len(data), 10)
 		start := time.Now()
+		resultCount := 0
 		for s := range ExecutePipeline(in, done, stages...) {
-			result = append(result, s.(string))
+			result[s.(Task).id-1] = s.(Task).result.(string)
+			resultCount++
 		}
 		elapsed := time.Since(start)
 
-		require.Len(t, result, 0)
+		require.Equal(t, resultCount, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
 }
