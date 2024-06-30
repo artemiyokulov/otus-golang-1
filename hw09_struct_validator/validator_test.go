@@ -19,7 +19,7 @@ type (
 		Email  string          `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
 		Role   UserRole        `validate:"in:admin,stuff"`
 		Phones []string        `validate:"len:11"`
-		meta   json.RawMessage //nolint:unused
+		meta   json.RawMessage //nolint:all
 	}
 
 	App struct {
