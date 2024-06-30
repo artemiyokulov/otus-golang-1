@@ -88,6 +88,7 @@ var validators = map[string]ValidatorType{
 		supportedType: []reflect.Kind{reflect.String, reflect.Int},
 		checkFunc: CheckRule(func(value any, args ...string) (bool, error) {
 			reflectValue := reflect.ValueOf(value)
+			//nolint:exhaustive
 			switch reflectValue.Kind() {
 			case reflect.Int:
 				return slices.Contains(args, strconv.Itoa(int(reflectValue.Int()))), nil
@@ -159,6 +160,7 @@ func createError(val any, tag ValidatorTag) error {
 
 func validate(fieldName string, val reflect.Value, validatorTags []ValidatorTag) error {
 	errors := ValidationErrors{}
+	//nolint:exhaustive
 	switch kind := val.Kind(); kind {
 	case reflect.Int, reflect.String:
 		for _, tag := range validatorTags {
@@ -179,6 +181,7 @@ func validate(fieldName string, val reflect.Value, validatorTags []ValidatorTag)
 	case reflect.Slice:
 		for i := 0; i < val.Len(); i++ {
 			if err := validate(fieldName, val.Index(i), validatorTags); err != nil {
+				//nolint:errorlint
 				switch e := err.(type) {
 				case ValidationErrors:
 					errors = append(errors, e...)
@@ -217,6 +220,7 @@ func Validate(v interface{}) error {
 			if validateTag := tag.Get("validate"); validateTag != "" {
 				validatorTags := parseTag(validateTag)
 				if err := validate(fieldName, fieldVal, validatorTags); err != nil {
+					//nolint:errorlint
 					switch e := err.(type) {
 					case ValidationErrors:
 						errors = append(errors, e...)
