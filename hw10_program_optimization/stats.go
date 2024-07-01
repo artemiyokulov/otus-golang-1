@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+//todo: sync.pool
+
 type User struct {
 	ID       int
 	Name     string
@@ -51,7 +53,7 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
+		matched, err := regexp.Match("\\."+domain, []byte(user.Email)) // todo: regexp -> endwith
 		if err != nil {
 			return nil, err
 		}
