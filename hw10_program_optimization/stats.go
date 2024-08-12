@@ -1,14 +1,19 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"io"
-	"regexp"
+
+	_ "net/http/pprof"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 //todo: sync.pool
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type User struct {
 	ID       int
@@ -33,18 +38,15 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 type users [100_000]User
 
 func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
+	scanner := bufio.NewScanner(r)
+	i := 0
+	for scanner.Scan() {
 		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
+		if err = json.Unmarshal(scanner.Bytes(), &user); err != nil {
+			continue
 		}
 		result[i] = user
+		i++
 	}
 	return
 }
@@ -53,15 +55,9 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email)) // todo: regexp -> endwith
-		if err != nil {
-			return nil, err
-		}
-
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+		if strings.HasSuffix(strings.ToLower(user.Email), strings.ToLower("."+domain)) {
+			subdomain := strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])
+			result[subdomain]++
 		}
 	}
 	return result, nil
