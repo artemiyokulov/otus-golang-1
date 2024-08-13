@@ -4,13 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
 )
-
-//todo: sync.pool
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
