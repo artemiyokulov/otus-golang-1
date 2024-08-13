@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 
-	_ "net/http/pprof"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"

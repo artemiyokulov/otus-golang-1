@@ -1,0 +1,11 @@
+goos: darwin
+goarch: amd64
+cpu: VirtualApple @ 2.50GHz
+BenchmarkGetDomainStatBench
+BenchmarkGetDomainStatBench-10    	     201	   5597479 ns/op	  152387 B/op	    8077 allocs/op
+BenchmarkGetDomainStatBench-10    	     180	   5857448 ns/op	  169685 B/op	    9019 allocs/op
+BenchmarkGetDomainStatBench-10    	     182	   5673998 ns/op	  167865 B/op	    8920 allocs/op
+BenchmarkGetDomainStatBench-10    	     192	   5626717 ns/op	  159331 B/op	    8455 allocs/op
+BenchmarkGetDomainStatBench-10    	     177	   5930794 ns/op	  172487 B/op	    9172 allocs/op
+PASS
+ok  	command-line-arguments	13.577s
